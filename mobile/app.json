@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Clipart AI",
+    "slug": "clipart-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/download.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0A0F"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0A0F"
+      },
+      "package": "com.clipartai.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image-picker",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Clipart AI to save generated images.",
+          "savePhotosPermission": "Allow Clipart AI to save generated images."
+        }
+      ]
+    ],
+    "scheme": "clipartai",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

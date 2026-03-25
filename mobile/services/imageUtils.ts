@@ -1,0 +1,44 @@
+import * as ImageManipulator from "expo-image-manipulator";
+import * as FileSystem from "expo-file-system";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MAX_IMAGE_DIMENSION, IMAGE_QUALITY, CACHE_KEY_PREFIX } from "../constants/config";
+import CryptoJS from "crypto-js";
+
+// Compress + resize image and return base64
+export async function prepareImage(uri: string): Promise<string> {
+  const manipulated = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { width: MAX_IMAGE_DIMENSION, height: MAX_IMAGE_DIMENSION } }],
+    { compress: IMAGE_QUALITY, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+  );
+  return `data:image/jpeg;base64,${manipulated.base64}`;
+}
+
+// Hash image base64 for cache key
+export function hashImage(base64: string): string {
+  return CryptoJS.MD5(base64.slice(0, 500)).toString();
+}
+
+// Cache results by image hash + style combo
+export async function getCachedResult(imageHash: string, styleId: string): Promise<string | null> {
+  try {
+    const key = `${CACHE_KEY_PREFIX}${imageHash}_${styleId}`;
+    return await AsyncStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+export async function setCachedResult(imageHash: string, styleId: string, url: string) {
+  try {
+    const key = `${CACHE_KEY_PREFIX}${imageHash}_${styleId}`;
+    await AsyncStorage.setItem(key, url);
+  } catch {}
+}
+
+// Download image to device
+export async function downloadImage(url: string, filename: string): Promise<string> {
+  const fileUri = FileSystem.documentDirectory + filename;
+  const { uri } = await FileSystem.downloadAsync(url, fileUri);
+  return uri;
+}
