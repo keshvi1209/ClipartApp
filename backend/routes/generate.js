@@ -7,14 +7,31 @@ const router = express.Router();
 
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
-// Validate base64 image
+// Validate base64 image - returns { valid: boolean, raw?: string, error?: string }
 function validateImage(base64) {
-  if (!base64 || typeof base64 !== "string") return false;
+  if (!base64 || typeof base64 !== "string") {
+    return { valid: false, error: "Missing image data" };
+  }
+  
   // Strip data URI prefix if present
   const raw = base64.replace(/^data:image\/\w+;base64,/, "");
-  if (raw.length < 100) return false; // Too small
-  if (raw.length > 6_000_000) return false; // >~4.5MB base64 → reject
-  return raw;
+  
+  if (raw.length < 100) {
+    return { valid: false, error: "Image data too small (corrupted or invalid)" };
+  }
+  
+  // Increased from 6MB to 15MB base64 (handles up to ~11MB decoded images)
+  if (raw.length > 15_000_000) {
+    const sizeMB = (raw.length / 1_000_000).toFixed(1);
+    return { valid: false, error: `Image too large (${sizeMB}MB base64). Please use an image under 10MB.` };
+  }
+  
+  // Basic base64 validation
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(raw)) {
+    return { valid: false, error: "Invalid base64 encoding" };
+  }
+  
+  return { valid: true, raw };
 }
 
 // Run a single style generation
@@ -74,9 +91,10 @@ router.post("/single", generateLimiter, async (req, res, next) => {
   try {
     const { image, styleId, customPrompt } = req.body;
 
-    const rawBase64 = validateImage(image);
-    if (!rawBase64) {
-      return res.status(400).json({ error: "Invalid or missing image data." });
+    const validation = validateImage(image);
+    if (!validation.valid) {
+      console.log(`[UPLOAD ERROR] ${validation.error}`);
+      return res.status(400).json({ error: validation.error });
     }
     if (!STYLES[styleId]) {
       return res.status(400).json({ error: "Invalid style ID." });
@@ -84,8 +102,9 @@ router.post("/single", generateLimiter, async (req, res, next) => {
 
     const imageDataUri = image.startsWith("data:")
       ? image
-      : `data:image/jpeg;base64,${rawBase64}`;
+      : `data:image/jpeg;base64,${validation.raw}`;
 
+    console.log(`[UPLOAD] Single style: ${styleId}, size: ${(validation.raw.length / 1_000_000).toFixed(2)}MB`);
     const result = await runGeneration(styleId, imageDataUri, customPrompt);
     res.json(result);
   } catch (err) {
@@ -98,9 +117,10 @@ router.post("/batch", generateLimiter, async (req, res, next) => {
   try {
     const { image, styles, customPrompt } = req.body;
 
-    const rawBase64 = validateImage(image);
-    if (!rawBase64) {
-      return res.status(400).json({ error: "Invalid or missing image data." });
+    const validation = validateImage(image);
+    if (!validation.valid) {
+      console.log(`[UPLOAD ERROR] ${validation.error}`);
+      return res.status(400).json({ error: validation.error });
     }
 
     const requestedStyles = styles && Array.isArray(styles)
@@ -113,8 +133,10 @@ router.post("/batch", generateLimiter, async (req, res, next) => {
 
     const imageDataUri = image.startsWith("data:")
       ? image
-      : `data:image/jpeg;base64,${rawBase64}`;
+      : `data:image/jpeg;base64,${validation.raw}`;
 
+    console.log(`[UPLOAD] Batch generation: ${requestedStyles.length} styles, size: ${(validation.raw.length / 1_000_000).toFixed(2)}MB`);
+    
     // Fire all in parallel
     const results = await Promise.allSettled(
       requestedStyles.map((styleId) =>
