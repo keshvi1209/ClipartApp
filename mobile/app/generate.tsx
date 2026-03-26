@@ -25,7 +25,8 @@ import { useDownload } from "../hooks/useDownload";
 const { width } = Dimensions.get("window");
 
 export default function GenerateScreen() {
-  const { imageUri } = useLocalSearchParams<{ imageUri: string }>();
+ const { imageUri, selectedStyles } = useLocalSearchParams<{ imageUri: string; selectedStyles: string }>();
+const selectedStyleIds = selectedStyles ? selectedStyles.split(",") : [];
   const router = useRouter();
   const { status, results, error, generate, retry, reset } = useGenerate();
   const { downloadToGallery, shareImage } = useDownload();
@@ -38,7 +39,7 @@ export default function GenerateScreen() {
   useEffect(() => {
     if (imageUri && !hasStarted) {
       setHasStarted(true);
-      generate(imageUri, customPrompt);
+      generate(imageUri, customPrompt, selectedStyleIds);
     }
   }, [imageUri]);
 
@@ -54,7 +55,7 @@ export default function GenerateScreen() {
     if (!imageUri) return;
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     reset();
-    generate(imageUri, customPrompt);
+    generate(imageUri, customPrompt, selectedStyleIds);
   };
 
   const handleDownloadAll = async () => {

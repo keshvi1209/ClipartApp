@@ -6,9 +6,9 @@ import "../global.css";
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0A0A0F" }}>
       <SafeAreaProvider>
-        <StatusBar style="light" backgroundColor="#0A0A0F" />
+        <StatusBar style="light" backgroundColor="#0A0A0F" translucent={false} />
         <Stack
           screenOptions={{
             headerShown: false,
@@ -17,8 +17,20 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" />
-          <Stack.Screen name="generate" options={{ animation: "slide_from_bottom" }} />
-          <Stack.Screen name="result" />
+          <Stack.Screen
+            name="preview"
+            options={{
+              animation: "slide_from_right",
+              contentStyle: { backgroundColor: "#0A0A0F" },
+            }}
+          />
+          <Stack.Screen
+            name="generate"
+            options={{
+              animation: "slide_from_bottom",
+              contentStyle: { backgroundColor: "#0A0A0F" },
+            }}
+          />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { api, GenerateResult } from "../services/api";
+import { api } from "../services/api";
 import { prepareImage, hashImage, getCachedResult, setCachedResult, validateImageSize } from "../services/imageUtils";
 import { STYLES, StyleId } from "../constants/config";
 
@@ -24,24 +24,31 @@ export function useGenerate() {
     );
   }, []);
 
-  const generate = useCallback(async (imageUri: string, customPrompt?: string) => {
+  const generate = useCallback(async (
+    imageUri: string,
+    customPrompt?: string,
+    selectedStyleIds?: string[]
+  ) => {
     abortRef.current = false;
     setError(null);
 
-    // Init all as loading
-    setResults(STYLES.map((s) => ({ styleId: s.id, status: "loading" })));
+    const stylesToGenerate =
+      selectedStyleIds && selectedStyleIds.length > 0
+        ? STYLES.filter((s) => selectedStyleIds.includes(s.id))
+        : STYLES;
+
+    setResults(stylesToGenerate.map((s) => ({ styleId: s.id, status: "loading" })));
     setStatus("preparing");
 
     let base64: string;
     try {
       base64 = await prepareImage(imageUri);
     } catch (e: any) {
-      setError(`Failed to process image: ${e.message || 'Unknown error'}. Try a different photo.`);
+      setError(`Failed to process image: ${e.message || "Unknown error"}. Try a different photo.`);
       setStatus("error");
       return;
     }
 
-    // Validate size before uploading
     const sizeValidation = validateImageSize(base64);
     if (!sizeValidation.valid) {
       setError(sizeValidation.error || "Image validation failed");
@@ -53,9 +60,8 @@ export function useGenerate() {
 
     const imageHash = hashImage(base64);
 
-    // Check cache for each style
     const cachedResults = await Promise.all(
-      STYLES.map(async (s) => {
+      stylesToGenerate.map(async (s) => {
         const cached = await getCachedResult(imageHash, s.id);
         return { styleId: s.id, cached };
       })
@@ -77,7 +83,6 @@ export function useGenerate() {
 
     setStatus("generating");
 
-    // Generate all uncached styles in parallel via batch endpoint
     try {
       const { results: batchResults } = await api.generateBatch(base64, uncachedStyles, customPrompt);
 
@@ -96,26 +101,27 @@ export function useGenerate() {
       if (abortRef.current) return;
       setError(e.message || "Generation failed. Please try again.");
       setStatus("error");
-      // Mark all still-loading as error
       setResults((prev) =>
         prev.map((r) => (r.status === "loading" ? { ...r, status: "error" } : r))
       );
     }
   }, [updateResult]);
 
-  // Retry a single style
-  const retry = useCallback(async (imageUri: string, styleId: StyleId, customPrompt?: string) => {
+  const retry = useCallback(async (
+    imageUri: string,
+    styleId: StyleId,
+    customPrompt?: string
+  ) => {
     updateResult(styleId, { status: "loading", error: undefined });
     try {
       const base64 = await prepareImage(imageUri);
-      
-      // Validate size
+
       const sizeValidation = validateImageSize(base64);
       if (!sizeValidation.valid) {
         updateResult(styleId, { status: "error", error: sizeValidation.error });
         return;
       }
-      
+
       const result = await api.generateSingle(base64, styleId, customPrompt);
       if (result.success && result.url) {
         updateResult(styleId, { status: "success", url: result.url });

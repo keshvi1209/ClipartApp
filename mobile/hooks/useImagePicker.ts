@@ -1,61 +1,75 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 
 export function useImagePicker() {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const isPickingRef = useRef(false);
 
-  const pickFromGallery = useCallback(async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission Required", "Please grant gallery access in Settings.");
-      return;
-    }
+  const pickFromGallery = useCallback(async (): Promise<string | null> => {
+    if (isPickingRef.current) return null;
+    isPickingRef.current = true;
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      
-      // Validate MIME type (actual format)
-      const mimeType = asset.mimeType || asset.type;
-      if (mimeType && !mimeType.startsWith('image/')) {
-        Alert.alert("Invalid File", "Please select an image file.");
-        return;
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Required", "Please grant gallery access in Settings.");
+        return null;
       }
-      
-      // Validate format extension
-      const ext = asset.uri.split(".").pop()?.toLowerCase();
-      if (ext && !["jpg", "jpeg", "png", "webp", "heic", "gif"].includes(ext)) {
-        Alert.alert("Unsupported Format", "Please use JPG, PNG, WEBP, or HEIC images.");
-        return;
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"] as any,
+        allowsEditing: true,
+        aspect: [1, 1] as [number, number],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets?.[0]) {
+        const uri = result.assets[0].uri;
+        setImageUri(uri);
+        return uri;
       }
-      
-      setImageUri(asset.uri);
+      return null;
+    } catch (e) {
+      console.log("Gallery error:", e);
+      Alert.alert("Error", "Failed to open gallery.");
+      return null;
+    } finally {
+      isPickingRef.current = false;
     }
   }, []);
 
-  const pickFromCamera = useCallback(async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission Required", "Please grant camera access in Settings.");
-      return;
-    }
+  const pickFromCamera = useCallback(async (): Promise<string | null> => {
+    if (isPickingRef.current) return null;
+    isPickingRef.current = true;
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Required", "Please grant camera access in Settings.");
+        return null;
+      }
 
-    if (!result.canceled && result.assets[0]) {
-      setImageUri(result.assets[0].uri);
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1] as [number, number],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets?.[0]) {
+        const uri = result.assets[0].uri;
+        setImageUri(uri);
+        return uri;
+      }
+      return null;
+    } catch (e) {
+      console.log("Camera error:", e);
+      Alert.alert("Error", "Failed to open camera.");
+      return null;
+    } finally {
+      isPickingRef.current = false;
     }
   }, []);
 
