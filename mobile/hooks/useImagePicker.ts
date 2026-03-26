@@ -19,14 +19,24 @@ export function useImagePicker() {
       quality: 1,
     });
 
+    
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
-      // Validate format
-      const ext = asset.uri.split(".").pop()?.toLowerCase();
-      if (ext && !["jpg", "jpeg", "png", "webp", "heic"].includes(ext)) {
-        Alert.alert("Unsupported Format", "Please use JPG, PNG, or WEBP images.");
+      
+      // Validate MIME type (actual format)
+      const mimeType = asset.mimeType || asset.type;
+      if (mimeType && !mimeType.startsWith('image/')) {
+        Alert.alert("Invalid File", "Please select an image file.");
         return;
       }
+      
+      // Validate format extension
+      const ext = asset.uri.split(".").pop()?.toLowerCase();
+      if (ext && !["jpg", "jpeg", "png", "webp", "heic", "gif"].includes(ext)) {
+        Alert.alert("Unsupported Format", "Please use JPG, PNG, WEBP, or HEIC images.");
+        return;
+      }
+      
       setImageUri(asset.uri);
     }
   }, []);

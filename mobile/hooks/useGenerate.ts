@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { api, GenerateResult } from "../services/api";
-import { prepareImage, hashImage, getCachedResult, setCachedResult } from "../services/imageUtils";
+import { prepareImage, hashImage, getCachedResult, setCachedResult, validateImageSize } from "../services/imageUtils";
 import { STYLES, StyleId } from "../constants/config";
 
 export type GenerationStatus = "idle" | "preparing" | "generating" | "done" | "error";
@@ -36,7 +36,15 @@ export function useGenerate() {
     try {
       base64 = await prepareImage(imageUri);
     } catch (e: any) {
-      setError("Failed to process image. Try a different photo.");
+      setError(`Failed to process image: ${e.message || 'Unknown error'}. Try a different photo.`);
+      setStatus("error");
+      return;
+    }
+
+    // Validate size before uploading
+    const sizeValidation = validateImageSize(base64);
+    if (!sizeValidation.valid) {
+      setError(sizeValidation.error || "Image validation failed");
       setStatus("error");
       return;
     }
@@ -100,6 +108,14 @@ export function useGenerate() {
     updateResult(styleId, { status: "loading", error: undefined });
     try {
       const base64 = await prepareImage(imageUri);
+      
+      // Validate size
+      const sizeValidation = validateImageSize(base64);
+      if (!sizeValidation.valid) {
+        updateResult(styleId, { status: "error", error: sizeValidation.error });
+        return;
+      }
+      
       const result = await api.generateSingle(base64, styleId, customPrompt);
       if (result.success && result.url) {
         updateResult(styleId, { status: "success", url: result.url });

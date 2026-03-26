@@ -13,10 +13,37 @@ export interface BatchResult {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    // Handle rate limiting
+    if (res.status === 429) {
+      throw new Error("Too many requests. Please wait a moment and try again.");
+    }
+    
     const err = await res.json().catch(() => ({ error: "Unknown error" }));
-    throw new Error(err.error || `HTTP ${res.status}`);
+    throw new Error(err.error || `Server error (${res.status})`);
   }
   return res.json();
+}
+
+// Fetch with timeout
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number = 30000): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    return response;
+  } catch (err: any) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      throw new Error('Request timeout. Please check your connection and try again.');
+    }
+    console.error('[API] Network error:', { url, method: options.method, error: err.message });
+    throw err;
+  }
 }
 
 export const api = {
@@ -25,7 +52,7 @@ export const api = {
     styles?: StyleId[],
     customPrompt?: string
   ): Promise<BatchResult> {
-    const res = await fetch(`${API_BASE_URL}/api/generate/batch`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/generate/batch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -42,7 +69,7 @@ export const api = {
     styleId: StyleId,
     customPrompt?: string
   ): Promise<GenerateResult> {
-    const res = await fetch(`${API_BASE_URL}/api/generate/single`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/generate/single`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -55,7 +82,7 @@ export const api = {
   },
 
   async getStyles() {
-    const res = await fetch(`${API_BASE_URL}/api/generate/styles`);
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/generate/styles`, {});
     return handleResponse<{ styles: { id: StyleId; label: string; emoji: string }[] }>(res);
   },
 };

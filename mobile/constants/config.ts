@@ -1,5 +1,9 @@
-// ⚠️ Replace with your deployed Render backend URL
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:3001";
+// ⚠️ Update this with your computer's IP address when testing on physical device
+// Find your IP: Windows: ipconfig | Mac/Linux: ifconfig
+// For emulator: use http://10.0.2.2:3001
+// For physical device: use http://YOUR_COMPUTER_IP:3001
+// For production: use your Render URL
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.100:3001";
 
 export const STYLES = [
   { id: "cartoon", label: "Cartoon", emoji: "🎨", color: "#F59E0B" },
