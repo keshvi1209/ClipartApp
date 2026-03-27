@@ -100,7 +100,6 @@ export default function PreviewScreen() {
         <View style={{ width: 60 }} />
       </View>
 
-      {/* keyboardShouldPersistTaps allows buttons inside the scrollview to be tapped while keyboard is open */}
       <ScrollView 
         contentContainerStyle={styles.scroll} 
         showsVerticalScrollIndicator={false}
@@ -188,48 +187,46 @@ export default function PreviewScreen() {
 
       {/* --- PROMPT EDITOR BOTTOM SHEET WITH KEYBOARD AVOIDANCE --- */}
       {editingPrompt && (
-        <>
-          {/* Invisible backdrop to detect taps outside the bottom sheet */}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"} 
+          style={styles.keyboardWrapper}
+        >
+          {/* Invisible backdrop inside the flex container */}
           <TouchableWithoutFeedback onPress={handleDismissSheet}>
             <View style={styles.backdrop} />
           </TouchableWithoutFeedback>
 
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"} 
-            style={styles.keyboardWrapper}
-          >
-            <View style={styles.promptSheet}>
-              <View style={styles.promptSheetHandle} />
-              <Text style={styles.promptSheetTitle}>
-                {ALL_STYLES.find(s => s.id === editingPrompt)?.emoji}{" "}
-                Custom prompt for{" "}
-                <Text style={styles.promptSheetStyleName}>
-                  {ALL_STYLES.find(s => s.id === editingPrompt)?.label}
-                </Text>
+          <View style={styles.promptSheet}>
+            <View style={styles.promptSheetHandle} />
+            <Text style={styles.promptSheetTitle}>
+              {ALL_STYLES.find(s => s.id === editingPrompt)?.emoji}{" "}
+              Custom prompt for{" "}
+              <Text style={styles.promptSheetStyleName}>
+                {ALL_STYLES.find(s => s.id === editingPrompt)?.label}
               </Text>
-              <TextInput
-                style={styles.promptSheetInput}
-                placeholder="e.g. wearing a hoodie, night background…"
-                placeholderTextColor="#3D3D55"
-                value={draftPrompt}
-                onChangeText={setDraftPrompt}
-                multiline
-                autoFocus
-              />
-              <View style={styles.promptSheetActions}>
-                <TouchableOpacity
-                  style={styles.promptSheetCancel}
-                  onPress={handleDismissSheet}
-                >
-                  <Text style={styles.promptSheetCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.promptSheetSave} onPress={savePrompt}>
-                  <Text style={styles.promptSheetSaveText}>✓  Save</Text>
-                </TouchableOpacity>
-              </View>
+            </Text>
+            <TextInput
+              style={styles.promptSheetInput}
+              placeholder="e.g. wearing a hoodie, night background…"
+              placeholderTextColor="#3D3D55"
+              value={draftPrompt}
+              onChangeText={setDraftPrompt}
+              multiline
+              autoFocus
+            />
+            <View style={styles.promptSheetActions}>
+              <TouchableOpacity
+                style={styles.promptSheetCancel}
+                onPress={handleDismissSheet}
+              >
+                <Text style={styles.promptSheetCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.promptSheetSave} onPress={savePrompt}>
+                <Text style={styles.promptSheetSaveText}>✓  Save</Text>
+              </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
-        </>
+          </View>
+        </KeyboardAvoidingView>
       )}
 
       {/* Generate CTA */}
@@ -325,27 +322,25 @@ const styles = StyleSheet.create({
   selectLink: { fontSize: 12, color: "#6D3AE0" },
   selectDivider: { color: "#2A2A38" },
 
-  // --- NEW KEYBOARD & SHEET STYLES ---
+  // --- UPDATED KEYBOARD & SHEET STYLES ---
+  keyboardWrapper: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "flex-end", // Pushes the promptSheet to the bottom
+    zIndex: 100, 
+    elevation: 10,              // Critical edge-case fix for Android z-index
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.5)', 
-    zIndex: 99,
   },
-  keyboardWrapper: {
-    position: "absolute", 
-    bottom: 0, 
-    left: 0, 
-    right: 0,
-    zIndex: 100, 
-  },
+  // ---------------------------------------
+
   promptSheet: {
     backgroundColor: "#13121E",
     borderTopLeftRadius: 20, borderTopRightRadius: 20,
     borderTopWidth: 1, borderColor: "#2A2040",
     padding: 20, paddingBottom: 36,
   },
-  // -----------------------------------
-
   promptSheetHandle: {
     width: 36, height: 4, borderRadius: 2,
     backgroundColor: "#2A2A3A",
