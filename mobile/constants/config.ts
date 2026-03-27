@@ -3,7 +3,15 @@
 // For emulator: use http://10.0.2.2:3001
 // For physical device: use http://YOUR_COMPUTER_IP:3001
 // For production: use your Render URL
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.100:3001";
+
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://10.78.0.238:3001";
+
+// Validate API URL is set
+if (!API_BASE_URL) {
+  console.warn(
+    "[CONFIG] API_BASE_URL not configured. Set EXPO_PUBLIC_API_URL in .env or update config.ts"
+  );
+}
 
 export const STYLES = [
   { id: "cartoon", label: "Cartoon", emoji: "🎨", color: "#F59E0B" },

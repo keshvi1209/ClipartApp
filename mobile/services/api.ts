@@ -42,7 +42,7 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: nu
       throw new Error('Request timeout. Please check your connection and try again.');
     }
     console.error('[API] Network error:', { url, method: options.method, error: err.message });
-    throw err;
+    throw new Error(`Failed to connect to ${url}: ${err.message}`);
   }
 }
 
