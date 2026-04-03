@@ -92,6 +92,22 @@ export default function ResultScreen() {
   const isGenerating = status === "generating" || status === "preparing";
   const successCount = results.filter((r) => r.status === "success").length;
 
+  // Debug logging
+  useEffect(() => {
+    console.log("🖼️ Result Screen State:", {
+      status,
+      isGenerating,
+      isDone,
+      resultsCount: results.length,
+      successCount,
+      results: results.map(r => ({ 
+        styleId: r.styleId, 
+        status: r.status, 
+        hasUrl: !!r.url 
+      }))
+    });
+  }, [status, results]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { api } from "../services/api";
-import { prepareImage, hashImage, getCachedResult, setCachedResult, validateImageSize } from "../services/imageUtils";
+import { prepareImage, validateImageSize } from "../services/imageUtils";
 import { STYLES, StyleId } from "../constants/config";
 
 export type GenerationStatus = "idle" | "preparing" | "generating" | "done" | "error";
@@ -29,11 +29,6 @@ export function useGenerate() {
     customPrompt?: string,
     selectedStyleIds?: string[]
   ) => {
-    // 🚀 --- START OF DEBUG CONSOLE --- 🚀
-    console.group(`\n🚀 [GENERATION STARTED] - ${new Date().toLocaleTimeString()}`);
-    console.time("⏱️ Total Execution Time");
-   
-
     abortRef.current = false;
     setError(null);
 
@@ -47,104 +42,56 @@ export function useGenerate() {
 
     let base64: string;
     try {
-      console.time("⚙️ Image Prep Time");
       base64 = await prepareImage(imageUri);
-      console.timeEnd("⚙️ Image Prep Time");
-
     } catch (e: any) {
-      console.error("❌ ERROR: Image Prep Failed:", e);
-      setError(`Failed to process image: ${e.message || "Unknown error"}. Try a different photo.`);
+      setError(`Failed to process image: ${e.message || "Unknown error"}.`);
       setStatus("error");
-      console.groupEnd();
       return;
     }
 
     const sizeValidation = validateImageSize(base64);
     if (!sizeValidation.valid) {
-      console.warn("⚠️ ERROR: Size Validation Failed:", sizeValidation.error);
       setError(sizeValidation.error || "Image validation failed");
       setStatus("error");
-      console.groupEnd();
       return;
     }
 
-    if (abortRef.current) {
-      console.log("🛑 4. Generation Aborted by User");
-      console.groupEnd();
-      return;
-    }
+    if (abortRef.current) return;
 
-    const imageHash = hashImage(base64);
-    
-
-    const cachedResults = await Promise.all(
-      stylesToGenerate.map(async (s) => {
-        const cached = await getCachedResult(imageHash, s.id);
-        return { styleId: s.id, cached };
-      })
-    );
-
-    const uncachedStyles: StyleId[] = [];
-    for (const { styleId, cached } of cachedResults) {
-      if (cached) {
-      
-        updateResult(styleId, { status: "success", url: cached });
-      } else {
-        uncachedStyles.push(styleId);
-      }
-    }
-
-    if (uncachedStyles.length === 0) {
-     
-      setStatus("done");
-      console.timeEnd("⏱️ Total Execution Time");
-      console.groupEnd();
-      return;
-    }
-
-    console.log("🌐 5. Missing in Cache (Sending to API):", uncachedStyles);
+    const stylesToSend = stylesToGenerate.map(s => s.id) as StyleId[];
     setStatus("generating");
 
     try {
-   
-      console.time("⏳ API Network Wait Time");
-      
-      // The actual network request
-      const { results: batchResults } = await api.generateBatch(base64, uncachedStyles, customPrompt);
-      
-      console.timeEnd("⏳ API Network Wait Time");
-   
+      const { results: batchResults } = await api.generateBatch(base64, stylesToSend, customPrompt);
+      console.log("🎨 API response received:", JSON.stringify(batchResults, null, 2));
 
-      if (abortRef.current) {
-
-        console.groupEnd();
-        return;
-      }
+      if (abortRef.current) return;
 
       for (const result of batchResults) {
+        console.log(`📦 Processing ${result.styleId}:`, {
+          success: result.success,
+          hasUrl: !!result.url,
+          error: result.error,
+          urlLength: result.url?.length,
+        });
         if (result.success && result.url) {
+          console.log(`✅ Setting success for ${result.styleId}`);
           updateResult(result.styleId as StyleId, { status: "success", url: result.url });
-          setCachedResult(imageHash, result.styleId, result.url);
         } else {
-          console.error(`⚠️ BACKEND ERROR for ${result.styleId}:`, result.error);
+          console.log(`❌ Setting error for ${result.styleId}: ${result.error}`);
           updateResult(result.styleId as StyleId, { status: "error", error: result.error });
         }
       }
       setStatus("done");
     } catch (e: any) {
       if (abortRef.current) return;
-      console.error("💥 CRITICAL NETWORK ERROR:", e);
+      console.error("💥 API Error:", e);
       setError(e.message || "Generation failed. Please try again.");
       setStatus("error");
       setResults((prev) =>
         prev.map((r) => (r.status === "loading" ? { ...r, status: "error" } : r))
       );
     }
-    
-    console.timeEnd("⏱️ Total Execution Time");
-    console.groupEnd();
-    // 🚀 --- END OF DEBUG CONSOLE --- 🚀
-
   }, [updateResult]);
 
   const retry = useCallback(async (
@@ -152,22 +99,17 @@ export function useGenerate() {
     styleId: StyleId,
     customPrompt?: string
   ) => {
-    // Basic console tracking for individual retries
     updateResult(styleId, { status: "loading", error: undefined });
     try {
       const base64 = await prepareImage(imageUri);
-
       const sizeValidation = validateImageSize(base64);
       if (!sizeValidation.valid) {
         updateResult(styleId, { status: "error", error: sizeValidation.error });
         return;
       }
-
       const result = await api.generateSingle(base64, styleId, customPrompt);
       if (result.success && result.url) {
         updateResult(styleId, { status: "success", url: result.url });
-        const hash = hashImage(base64);
-        setCachedResult(hash, styleId, result.url);
       } else {
         updateResult(styleId, { status: "error", error: result.error });
       }

@@ -7,8 +7,9 @@ import {
   Animated,
   ActivityIndicator,
 } from "react-native";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
+import * as FileSystem from "expo-file-system";
 import { StyleResult } from "../hooks/useGenerate";
 import { STYLES, StyleId } from "../constants/config";
 import { useDownload } from "../hooks/useDownload";
@@ -24,9 +25,45 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   const { downloadToGallery, shareImage } = useDownload();
+  const [fileUri, setFileUri] = useState<string | null>(null);
+
+  // Convert large base64 data URI to file for better performance
+  useEffect(() => {
+    if (result.status === "success" && result.url && result.url.startsWith("data:")) {
+      const convertToFile = async () => {
+        try {
+          console.log(`📁 Converting base64 to file for ${result.styleId}...`);
+          const tempFile = `${FileSystem.cacheDirectory}clipart_${result.styleId}_temp.png`;
+          // Extract base64 from data URI
+          const base64 = result.url!.replace(/^data:image\/\w+;base64,/, "");
+          await FileSystem.writeAsStringAsync(tempFile, base64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          setFileUri(tempFile);
+          console.log(`✅ File saved: ${tempFile}`);
+        } catch (error) {
+          console.error(`❌ Failed to convert to file for ${result.styleId}:`, error);
+          // Fallback to data URI if file conversion fails
+          setFileUri(result.url!);
+        }
+      };
+      convertToFile();
+    }
+  }, [result.url, result.status]);
+
+  useEffect(() => {
+    console.log(`🎴 ResultCard ${result.styleId}:`, {
+      status: result.status,
+      hasUrl: !!result.url,
+      urlLength: result.url?.length,
+      hasFileUri: !!fileUri,
+      error: result.error,
+    });
+  }, [result, fileUri]);
 
   useEffect(() => {
     if (result.status === "success") {
+      console.log(`🎬 Starting animation for ${result.styleId}`);
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -38,7 +75,9 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
           friction: 8,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        console.log(`✨ Animation complete for ${result.styleId}`);
+      });
     }
   }, [result.status]);
 
@@ -79,12 +118,16 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
           </View>
         )}
 
-        {result.status === "success" && result.url && (
-          <Animated.Image
-            source={{ uri: result.url }}
-            style={[styles.image, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
-            resizeMode="cover"
-          />
+        {result.status === "success" && (fileUri || result.url) && (
+          <>
+            <Animated.Image
+              source={{ uri: fileUri || result.url! }}
+              style={[styles.image, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
+              resizeMode="cover"
+              onLoad={() => console.log(`✅ Image loaded: ${result.styleId}`)}
+              onError={(error) => console.log(`❌ Image error ${result.styleId}:`, error)}
+            />
+          </>
         )}
 
         {result.status === "error" && (
@@ -128,8 +171,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#13131A",
     borderRadius: 16,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#1E1E2A",
+    borderWidth: 2,
+    borderColor: "#FF00FF",
   },
   imageContainer: {
     width: "100%",

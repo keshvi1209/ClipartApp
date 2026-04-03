@@ -7,15 +7,17 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
+import { Feather } from "@expo/vector-icons"; // Swapped emojis for professional icons
 
 const { width } = Dimensions.get("window");
 
+// Updated to use Feather icons instead of emojis for cross-platform consistency
 const ALL_STYLES = [
-  { id: "cartoon", label: "Cartoon", emoji: "🎨", desc: "Stylised character art" },
-  { id: "anime", label: "Anime", emoji: "✨", desc: "Japanese animation" },
-  { id: "pixel", label: "Pixel Art", emoji: "👾", desc: "Retro 8-bit style" },
-  { id: "sketch", label: "Sketch", emoji: "✏️", desc: "Hand-drawn outline" },
-  { id: "flat", label: "Flat", emoji: "🖼️", desc: "Minimal illustration" },
+  { id: "cartoon", label: "Cartoon", icon: "smile", desc: "Stylised character art" },
+  { id: "anime", label: "Anime", icon: "star", desc: "Japanese animation" },
+  { id: "pixel", label: "Pixel Art", icon: "grid", desc: "Retro 8-bit style" },
+  { id: "sketch", label: "Sketch", icon: "edit-2", desc: "Hand-drawn outline" },
+  { id: "flat", label: "Flat", icon: "layers", desc: "Minimal illustration" },
 ];
 
 export default function PreviewScreen() {
@@ -25,13 +27,14 @@ export default function PreviewScreen() {
   const [stylePrompts, setStylePrompts] = useState<Record<string, string>>({});
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [draftPrompt, setDraftPrompt] = useState("");
+  
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
     ]).start();
   }, []);
 
@@ -88,16 +91,14 @@ export default function PreviewScreen() {
     });
   };
 
-  const handleBack = () => router.back();
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <Feather name="chevron-left" size={24} color="#A78BFA" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Your Photo</Text>
-        <View style={{ width: 60 }} />
+        <Text style={styles.headerTitle}>Configure Styles</Text>
+        <View style={{ width: 40 }} /> {/* Spacer for centering */}
       </View>
 
       <ScrollView 
@@ -106,92 +107,85 @@ export default function PreviewScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          
+          {/* Main Image Preview */}
           <View style={styles.imageWrapper}>
             <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
+            <View style={styles.imageOverlay} />
             <View style={styles.imageBadge}>
-              <Text style={styles.imageBadgeText}>✓ Photo ready</Text>
+              <Feather name="check-circle" size={12} color="#F1F0FF" style={{ marginRight: 6 }} />
+              <Text style={styles.imageBadgeText}>Ready for Engine</Text>
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Choose Styles</Text>
-            <Text style={styles.sectionSub}>Tap to select · ✏️ to add a custom prompt</Text>
+          {/* Section Header */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.tagline}>Select Modes</Text>
+            <View style={styles.selectRow}>
+              <TouchableOpacity onPress={() => setSelectedStyles(ALL_STYLES.map(s => s.id))}>
+                <Text style={styles.selectLink}>All</Text>
+              </TouchableOpacity>
+              <Text style={styles.selectDivider}>/</Text>
+              <TouchableOpacity onPress={() => setSelectedStyles([ALL_STYLES[0].id])}>
+                <Text style={styles.selectLink}>None</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-            <View style={styles.styleGrid}>
-              {ALL_STYLES.map((style) => {
-                const selected = selectedStyles.includes(style.id);
-                const prompt = stylePrompts[style.id];
-                const hasPrompt = !!prompt;
+          {/* Style Grid */}
+          <View style={styles.styleGrid}>
+            {ALL_STYLES.map((style) => {
+              const selected = selectedStyles.includes(style.id);
+              const prompt = stylePrompts[style.id];
+              const hasPrompt = !!prompt;
 
-                return (
-                  <TouchableOpacity
-                    key={style.id}
-                    style={[styles.styleCard, selected && styles.styleCardSelected]}
-                    onPress={() => toggleStyle(style.id)}
-                    activeOpacity={0.75}
-                  >
-                    <View style={styles.styleCardTop}>
-                      <Text style={styles.styleEmoji}>{style.emoji}</Text>
-                      <View style={styles.cardActions}>
-                        <TouchableOpacity
-                          style={[styles.pencilBtn, hasPrompt && styles.pencilBtnActive]}
-                          onPress={() => openPrompt(style.id)}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        >
-                          <Text style={styles.pencilIcon}>✏️</Text>
-                        </TouchableOpacity>
-                        {selected && (
-                          <View style={styles.checkBadge}>
-                            <Text style={styles.checkText}>✓</Text>
-                          </View>
-                        )}
-                      </View>
+              return (
+                <TouchableOpacity
+                  key={style.id}
+                  style={[styles.styleCard, selected && styles.styleCardSelected]}
+                  onPress={() => toggleStyle(style.id)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.styleCardTop}>
+                    <View style={[styles.iconBox, selected && styles.iconBoxSelected]}>
+                      <Feather name={style.icon as any} size={18} color={selected ? "#F1F0FF" : "#9CA3AF"} />
                     </View>
+                    <View style={styles.cardActions}>
+                      <TouchableOpacity
+                        style={[styles.actionBtn, hasPrompt && styles.actionBtnActive]}
+                        onPress={() => openPrompt(style.id)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Feather name="edit-3" size={14} color={hasPrompt ? "#A78BFA" : "#6B7280"} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
 
-                    <Text style={[styles.styleLabel, selected && styles.styleLabelSelected]}>
-                      {style.label}
-                    </Text>
-                    <Text style={styles.styleDesc}>{style.desc}</Text>
+                  <Text style={[styles.styleLabel, selected && styles.styleLabelSelected]}>{style.label}</Text>
+                  <Text style={styles.styleDesc}>{style.desc}</Text>
 
-                    {hasPrompt && (
-                      <View style={styles.promptPill}>
-                        <Text style={styles.promptPillText} numberOfLines={1}>
-                          "{prompt}"
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() => clearPrompt(style.id)}
-                          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                        >
-                          <Text style={styles.promptPillClear}>✕</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-
-          <View style={styles.selectRow}>
-            <TouchableOpacity onPress={() => setSelectedStyles(ALL_STYLES.map(s => s.id))}>
-              <Text style={styles.selectLink}>Select all</Text>
-            </TouchableOpacity>
-            <Text style={styles.selectDivider}>·</Text>
-            <TouchableOpacity onPress={() => setSelectedStyles([ALL_STYLES[0].id])}>
-              <Text style={styles.selectLink}>Clear</Text>
-            </TouchableOpacity>
+                  {hasPrompt && (
+                    <View style={styles.promptPill}>
+                      <Text style={styles.promptPillText} numberOfLines={1}>"{prompt}"</Text>
+                      <TouchableOpacity onPress={() => clearPrompt(style.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Feather name="x" size={12} color="#A78BFA" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
         </Animated.View>
       </ScrollView>
 
-      {/* --- PROMPT EDITOR BOTTOM SHEET WITH KEYBOARD AVOIDANCE --- */}
+      {/* --- PROMPT EDITOR BOTTOM SHEET --- */}
       {editingPrompt && (
         <KeyboardAvoidingView 
           behavior={Platform.OS === "ios" ? "padding" : "height"} 
           style={styles.keyboardWrapper}
         >
-          {/* Invisible backdrop inside the flex container */}
           <TouchableWithoutFeedback onPress={handleDismissSheet}>
             <View style={styles.backdrop} />
           </TouchableWithoutFeedback>
@@ -199,30 +193,23 @@ export default function PreviewScreen() {
           <View style={styles.promptSheet}>
             <View style={styles.promptSheetHandle} />
             <Text style={styles.promptSheetTitle}>
-              {ALL_STYLES.find(s => s.id === editingPrompt)?.emoji}{" "}
-              Custom prompt for{" "}
-              <Text style={styles.promptSheetStyleName}>
-                {ALL_STYLES.find(s => s.id === editingPrompt)?.label}
-              </Text>
+              Tweak <Text style={{ color: "#FFFFFF" }}>{ALL_STYLES.find(s => s.id === editingPrompt)?.label}</Text> Style
             </Text>
             <TextInput
               style={styles.promptSheetInput}
-              placeholder="e.g. wearing a hoodie, night background…"
-              placeholderTextColor="#3D3D55"
+              placeholder="e.g. wearing a neon jacket, cyberpunk city background..."
+              placeholderTextColor="#4B5563"
               value={draftPrompt}
               onChangeText={setDraftPrompt}
               multiline
               autoFocus
             />
             <View style={styles.promptSheetActions}>
-              <TouchableOpacity
-                style={styles.promptSheetCancel}
-                onPress={handleDismissSheet}
-              >
+              <TouchableOpacity style={styles.promptSheetCancel} onPress={handleDismissSheet}>
                 <Text style={styles.promptSheetCancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.promptSheetSave} onPress={savePrompt}>
-                <Text style={styles.promptSheetSaveText}>✓  Save</Text>
+                <Text style={styles.promptSheetSaveText}>Apply Override</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -231,18 +218,19 @@ export default function PreviewScreen() {
 
       {/* Generate CTA */}
       {!editingPrompt && (
-        <View style={styles.footer}>
+        <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
           <TouchableOpacity
             style={[styles.generateBtn, selectedStyles.length === 0 && styles.generateBtnDisabled]}
             onPress={handleGenerate}
             disabled={selectedStyles.length === 0}
-            activeOpacity={0.85}
+            activeOpacity={0.8}
           >
             <Text style={styles.generateBtnText}>
-              Generate {selectedStyles.length} Style{selectedStyles.length > 1 ? "s" : ""}
+              Initialize Engine ({selectedStyles.length})
             </Text>
+            <Feather name="zap" size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       )}
     </SafeAreaView>
   );
@@ -251,138 +239,113 @@ export default function PreviewScreen() {
 const CARD_WIDTH = (width - 48 - 12) / 2;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0A0A0F" },
+  container: { flex: 1, backgroundColor: "#050508" },
+  
   header: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingHorizontal: 20, paddingVertical: 14,
-    borderBottomWidth: 1, borderColor: "#1A1A24",
+    paddingHorizontal: 24, paddingVertical: 16,
   },
-  backBtn: { paddingVertical: 4, paddingRight: 16 },
-  backText: { color: "#8B7CF6", fontSize: 14 },
-  headerTitle: { fontSize: 15, fontWeight: "600", color: "#E8E7F5" },
-  scroll: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 120 },
+  backBtn: { width: 40, height: 40, justifyContent: "center", marginLeft: -8 },
+  headerTitle: { fontSize: 16, fontWeight: "700", color: "#FFFFFF", letterSpacing: 0.5 },
+  
+  scroll: { paddingHorizontal: 24, paddingTop: 10, paddingBottom: 120 },
+  
   imageWrapper: {
-    borderRadius: 16, overflow: "hidden",
-    marginBottom: 28, height: 240, position: "relative",
-  },
-  image: { width: "100%", height: "100%" },
-  imageBadge: {
-    position: "absolute", bottom: 12, left: 12,
-    backgroundColor: "rgba(90,40,180,0.75)",
-    paddingHorizontal: 10, paddingVertical: 5, borderRadius: 50,
-  },
-  imageBadgeText: { color: "#E8E7F5", fontSize: 11 },
-  section: { marginBottom: 16 },
-  sectionTitle: { fontSize: 17, fontWeight: "600", color: "#E8E7F5", marginBottom: 4 },
-  sectionSub: { fontSize: 12, color: "#555568", marginBottom: 16, lineHeight: 18 },
-  styleGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  styleCard: {
-    width: CARD_WIDTH, backgroundColor: "#111118",
-    borderRadius: 14, padding: 14,
+    borderRadius: 24, overflow: "hidden",
+    marginBottom: 32, height: 260,
     borderWidth: 1, borderColor: "#1E1E2A",
   },
-  styleCardSelected: { borderColor: "#6D3AE0", backgroundColor: "#100F1C" },
-  styleCardTop: {
-    flexDirection: "row", justifyContent: "space-between",
-    alignItems: "center", marginBottom: 10,
+  image: { width: "100%", height: "100%" },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 5, 8, 0.2)",
   },
-  styleEmoji: { fontSize: 24 },
-  cardActions: { flexDirection: "row", alignItems: "center", gap: 6 },
-  pencilBtn: {
-    width: 24, height: 24, borderRadius: 6,
-    backgroundColor: "#1A1A26",
-    alignItems: "center", justifyContent: "center",
+  imageBadge: {
+    position: "absolute", bottom: 16, left: 16,
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: "rgba(139, 92, 246, 0.8)", // Semi-transparent purple
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50,
+    backdropFilter: "blur(10px)", // Works on web/newer iOS
   },
-  pencilBtnActive: { backgroundColor: "#2D1A52" },
-  pencilIcon: { fontSize: 11 },
-  checkBadge: {
-    width: 18, height: 18, borderRadius: 9,
-    backgroundColor: "#6D3AE0",
-    alignItems: "center", justifyContent: "center",
+  imageBadgeText: { color: "#F1F0FF", fontSize: 12, fontWeight: "600" },
+  
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  tagline: { fontSize: 12, letterSpacing: 2, color: "#8B5CF6", textTransform: "uppercase", fontWeight: "700" },
+  
+  selectRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  selectLink: { fontSize: 13, color: "#9CA3AF", fontWeight: "600" },
+  selectDivider: { color: "#374151", fontSize: 12 },
+
+  styleGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  styleCard: {
+    width: CARD_WIDTH, backgroundColor: "#0D0D14",
+    borderRadius: 20, padding: 16,
+    borderWidth: 1.5, borderColor: "#1E1E2A",
   },
-  checkText: { color: "#fff", fontSize: 10, fontWeight: "600" },
-  styleLabel: { fontSize: 13, fontWeight: "500", color: "#6B6B80", marginBottom: 3 },
-  styleLabelSelected: { color: "#E8E7F5" },
-  styleDesc: { fontSize: 11, color: "#3D3D4E", lineHeight: 15 },
+  styleCardSelected: { borderColor: "#8B5CF6", backgroundColor: "rgba(139, 92, 246, 0.05)" },
+  
+  styleCardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
+  iconBox: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: "#13131A", borderWidth: 1, borderColor: "#1E1E2A",
+    alignItems: "center", justifyContent: "center"
+  },
+  iconBoxSelected: { backgroundColor: "#8B5CF6", borderColor: "#8B5CF6" },
+  
+  cardActions: { flexDirection: "row", alignItems: "center" },
+  actionBtn: { padding: 6 },
+  actionBtnActive: { backgroundColor: "rgba(139, 92, 246, 0.1)", borderRadius: 8 },
+  
+  styleLabel: { fontSize: 15, fontWeight: "700", color: "#D1D5DB", marginBottom: 4 },
+  styleLabelSelected: { color: "#FFFFFF" },
+  styleDesc: { fontSize: 12, color: "#6B7280", lineHeight: 16 },
+  
   promptPill: {
-    flexDirection: "row", alignItems: "center",
-    marginTop: 8, backgroundColor: "#1E1530",
-    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 5,
-    borderWidth: 1, borderColor: "#3D2470", gap: 6,
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    marginTop: 12, backgroundColor: "#13131A",
+    borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8,
+    borderWidth: 1, borderColor: "#1E1E2A",
   },
-  promptPillText: {
-    flex: 1, fontSize: 10, color: "#A990E8",
-    fontStyle: "italic", lineHeight: 14,
-  },
-  promptPillClear: { fontSize: 10, color: "#5A4480" },
-  selectRow: {
-    flexDirection: "row", alignItems: "center",
-    gap: 8, marginBottom: 8, marginTop: 4,
-  },
-  selectLink: { fontSize: 12, color: "#6D3AE0" },
-  selectDivider: { color: "#2A2A38" },
+  promptPillText: { flex: 1, fontSize: 11, color: "#A78BFA", fontStyle: "italic", marginRight: 8 },
 
-  // --- UPDATED KEYBOARD & SHEET STYLES ---
-  keyboardWrapper: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "flex-end", // Pushes the promptSheet to the bottom
-    zIndex: 100, 
-    elevation: 10,              // Critical edge-case fix for Android z-index
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)', 
-  },
-  // ---------------------------------------
-
+  keyboardWrapper: { ...StyleSheet.absoluteFillObject, justifyContent: "flex-end", zIndex: 100, elevation: 10 },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(5, 5, 8, 0.8)' },
+  
   promptSheet: {
-    backgroundColor: "#13121E",
-    borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    borderTopWidth: 1, borderColor: "#2A2040",
-    padding: 20, paddingBottom: 36,
+    backgroundColor: "#0D0D14",
+    borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    borderTopWidth: 1, borderColor: "#1E1E2A",
+    padding: 24, paddingBottom: Platform.OS === "ios" ? 40 : 24,
   },
-  promptSheetHandle: {
-    width: 36, height: 4, borderRadius: 2,
-    backgroundColor: "#2A2A3A",
-    alignSelf: "center", marginBottom: 16,
-  },
-  promptSheetTitle: {
-    fontSize: 13, color: "#8B8BA0",
-    marginBottom: 12,
-  },
-  promptSheetStyleName: { color: "#E8E7F5", fontWeight: "600" },
+  promptSheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: "#374151", alignSelf: "center", marginBottom: 20 },
+  promptSheetTitle: { fontSize: 14, color: "#9CA3AF", marginBottom: 16, fontWeight: "500" },
   promptSheetInput: {
-    backgroundColor: "#0E0D18",
-    borderRadius: 12, borderWidth: 1, borderColor: "#2A2040",
-    padding: 14, color: "#E8E7F5",
-    fontSize: 14, lineHeight: 22,
-    minHeight: 90, textAlignVertical: "top",
+    backgroundColor: "#050508",
+    borderRadius: 16, borderWidth: 1, borderColor: "#1E1E2A",
+    padding: 16, color: "#FFFFFF",
+    fontSize: 15, lineHeight: 22,
+    minHeight: 100, textAlignVertical: "top",
   },
-  promptSheetActions: {
-    flexDirection: "row", gap: 10, marginTop: 12,
-  },
+  promptSheetActions: { flexDirection: "row", gap: 12, marginTop: 16 },
   promptSheetCancel: {
-    flex: 1, paddingVertical: 13,
-    backgroundColor: "#1A1928", borderRadius: 12,
-    alignItems: "center", borderWidth: 1, borderColor: "#2A2040",
+    flex: 1, paddingVertical: 16,
+    backgroundColor: "#13131A", borderRadius: 16,
+    alignItems: "center", borderWidth: 1, borderColor: "#1E1E2A",
   },
-  promptSheetCancelText: { color: "#6B6B80", fontSize: 14 },
-  promptSheetSave: {
-    flex: 1, paddingVertical: 13,
-    backgroundColor: "#6D3AE0", borderRadius: 12,
-    alignItems: "center",
-  },
-  promptSheetSaveText: { color: "#fff", fontSize: 14, fontWeight: "600" },
+  promptSheetCancelText: { color: "#9CA3AF", fontSize: 15, fontWeight: "600" },
+  promptSheetSave: { flex: 1, paddingVertical: 16, backgroundColor: "#8B5CF6", borderRadius: 16, alignItems: "center" },
+  promptSheetSaveText: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
+
   footer: {
     position: "absolute", bottom: 0, left: 0, right: 0,
-    padding: 20, paddingBottom: 32,
-    backgroundColor: "#0A0A0F",
-    borderTopWidth: 1, borderColor: "#1A1A24",
+    paddingHorizontal: 24, paddingVertical: 20, paddingBottom: Platform.OS === "ios" ? 36 : 24,
+    backgroundColor: "#050508",
+    borderTopWidth: 1, borderColor: "#1E1E2A",
   },
   generateBtn: {
-    backgroundColor: "#6D3AE0", borderRadius: 14,
-    paddingVertical: 16, alignItems: "center", elevation: 6,
+    flexDirection: "row", backgroundColor: "#8B5CF6", borderRadius: 16,
+    paddingVertical: 18, alignItems: "center", justifyContent: "center",
   },
-  generateBtnDisabled: { backgroundColor: "#161620", elevation: 0 },
-  generateBtnText: { fontSize: 15, fontWeight: "600", color: "#E8E7F5", letterSpacing: 0.2 },
+  generateBtnDisabled: { backgroundColor: "#1E1E2A" },
+  generateBtnText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF", letterSpacing: 0.5 },
 });
