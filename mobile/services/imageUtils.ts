@@ -4,14 +4,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MAX_IMAGE_DIMENSION, IMAGE_QUALITY, CACHE_KEY_PREFIX } from "../constants/config";
 import CryptoJS from "crypto-js";
 
-// Compress + resize image and return base64
 export async function prepareImage(uri: string): Promise<string> {
   const manipulated = await ImageManipulator.manipulateAsync(
     uri,
     [{ resize: { width: MAX_IMAGE_DIMENSION, height: MAX_IMAGE_DIMENSION } }],
     { compress: IMAGE_QUALITY, format: ImageManipulator.SaveFormat.JPEG, base64: true }
   );
-  return `data:image/jpeg;base64,${manipulated.base64}`;
+  
+  const base64Str = manipulated.base64 || '';
+  if (base64Str.startsWith('data:image')) {
+    return base64Str;
+  }
+  return `data:image/jpeg;base64,${base64Str}`;
 }
 
 // Validate image size before upload
