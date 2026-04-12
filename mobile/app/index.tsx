@@ -50,6 +50,7 @@ export default function HomeScreen() {
           <Text style={styles.tagline}>AI-powered</Text>
           <Text style={styles.title}>Clipart{"\n"}Generator</Text>
           <View style={styles.titleAccent} />
+          <Text style={styles.username}>Hi, keshvi agarwal</Text>
         </View>
 
         {/* Upload Zone */}
@@ -97,6 +98,7 @@ const styles = StyleSheet.create({
   tagline: { fontSize: 12, letterSpacing: 4, color: "#7C3AED", textTransform: "uppercase", fontWeight: "600", marginBottom: 8 },
   title: { fontSize: 44, fontWeight: "800", color: "#F1F0FF", lineHeight: 48, letterSpacing: -1 },
   titleAccent: { width: 40, height: 3, backgroundColor: "#7C3AED", borderRadius: 2, marginTop: 12 },
+  username: { marginTop: 8, fontSize: 14, color: "#9CA3AF", fontWeight: "500" },
   uploadZoneWrapper: { flex: 1, marginBottom: 20 },
   uploadZone: { flex: 1, borderRadius: 24, borderWidth: 1.5, borderColor: "#1E1E2A", borderStyle: "dashed", backgroundColor: "#13131A", alignItems: "center", justifyContent: "center", padding: 32 },
   uploadIcon: { fontSize: 48, marginBottom: 16 },
