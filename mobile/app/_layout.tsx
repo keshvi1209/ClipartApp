@@ -30,6 +30,7 @@ export default function RootLayout() {
               animation: "slide_from_bottom",
               contentStyle: { backgroundColor: "#0A0A0F" },
             }}
+            
           />
         </Stack>
       </SafeAreaProvider>
