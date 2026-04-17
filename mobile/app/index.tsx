@@ -1,13 +1,13 @@
 import {
-  View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated, Easing,
+  View, Text, TouchableOpacity, StyleSheet, Animated, Easing,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { useImagePicker } from "../hooks/useImagePicker";
-
-const { width } = Dimensions.get("window");
+import { Feather } from "@expo/vector-icons";
+import { colors, shadows } from "../constants/theme";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -47,27 +47,31 @@ export default function HomeScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.tagline}>AI-powered</Text>
-          <Text style={styles.title}>Clipart{"\n"}Generator</Text>
-          <View style={styles.titleAccent} />
-          <Text style={styles.username}>Hi, keshvi agarwal</Text>
+          <Text style={styles.tagline}>AI Clipart Studio</Text>
+          <Text style={styles.title}>Create polished clipart in minutes</Text>
+          <Text style={styles.subtitle}>
+            Upload a photo and get 5 professional styles instantly.
+          </Text>
         </View>
 
         {/* Upload Zone */}
         <Animated.View style={[styles.uploadZoneWrapper, { transform: [{ translateY: floatAnim }] }]}>
           <View style={styles.uploadZone}>
-            <Text style={styles.uploadIcon}>🖼️</Text>
-            <Text style={styles.uploadTitle}>Upload Your Photo</Text>
-            <Text style={styles.uploadSub}>Best results with a clear, well-lit face photo</Text>
+            <View style={styles.uploadIcon}>
+              <Feather name="image" size={28} color={colors.accent} />
+            </View>
+            <Text style={styles.uploadTitle}>Upload a photo</Text>
+            <Text style={styles.uploadSub}>
+              Clear, well-lit photos create the most accurate results.
+            </Text>
             <View style={styles.uploadButtons}>
-              <TouchableOpacity style={styles.uploadBtn} onPress={handleGallery} activeOpacity={0.75}>
-                <Text style={styles.uploadBtnIcon}>🗂️</Text>
-                <Text style={styles.uploadBtnText}>Gallery</Text>
+              <TouchableOpacity style={styles.uploadBtnPrimary} onPress={handleGallery} activeOpacity={0.75}>
+                <Feather name="upload" size={16} color="#FFFFFF" />
+                <Text style={styles.uploadBtnTextPrimary}>Gallery</Text>
               </TouchableOpacity>
-              <View style={styles.divider} />
-              <TouchableOpacity style={styles.uploadBtn} onPress={handleCamera} activeOpacity={0.75}>
-                <Text style={styles.uploadBtnIcon}>📷</Text>
-                <Text style={styles.uploadBtnText}>Camera</Text>
+              <TouchableOpacity style={styles.uploadBtnSecondary} onPress={handleCamera} activeOpacity={0.75}>
+                <Feather name="camera" size={16} color={colors.text} />
+                <Text style={styles.uploadBtnTextSecondary}>Camera</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -75,7 +79,7 @@ export default function HomeScreen() {
 
         {/* Style pills preview */}
         <View style={styles.stylesPreview}>
-          {["🎨 Cartoon", "✨ Anime", "👾 Pixel", "✏️ Sketch", "🖼️ Flat"].map((s) => (
+          {["Cartoon", "Anime", "Pixel Art", "Sketch", "Flat Art"].map((s) => (
             <View key={s} style={styles.stylePill}>
               <Text style={styles.stylePillText}>{s}</Text>
             </View>
@@ -92,26 +96,85 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0A0A0F" },
+  container: { flex: 1, backgroundColor: colors.background },
   inner: { flex: 1, paddingHorizontal: 24, paddingTop: 12, paddingBottom: 24 },
-  header: { marginBottom: 32 },
-  tagline: { fontSize: 12, letterSpacing: 4, color: "#7C3AED", textTransform: "uppercase", fontWeight: "600", marginBottom: 8 },
-  title: { fontSize: 44, fontWeight: "800", color: "#F1F0FF", lineHeight: 48, letterSpacing: -1 },
-  titleAccent: { width: 40, height: 3, backgroundColor: "#7C3AED", borderRadius: 2, marginTop: 12 },
-  username: { marginTop: 8, fontSize: 14, color: "#9CA3AF", fontWeight: "500" },
+  header: { marginBottom: 28 },
+  tagline: {
+    fontSize: 12,
+    letterSpacing: 2.5,
+    color: colors.accent,
+    textTransform: "uppercase",
+    fontWeight: "700",
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: colors.text,
+    lineHeight: 34,
+  },
+  subtitle: {
+    marginTop: 8,
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
   uploadZoneWrapper: { flex: 1, marginBottom: 20 },
-  uploadZone: { flex: 1, borderRadius: 24, borderWidth: 1.5, borderColor: "#1E1E2A", borderStyle: "dashed", backgroundColor: "#13131A", alignItems: "center", justifyContent: "center", padding: 32 },
-  uploadIcon: { fontSize: 48, marginBottom: 16 },
-  uploadTitle: { fontSize: 20, fontWeight: "700", color: "#F1F0FF", marginBottom: 8 },
-  uploadSub: { fontSize: 13, color: "#6B7280", textAlign: "center", lineHeight: 20, marginBottom: 28 },
-  uploadButtons: { flexDirection: "row", alignItems: "center" },
-  uploadBtn: { alignItems: "center", paddingHorizontal: 28, paddingVertical: 14, backgroundColor: "#1E1E2A", borderRadius: 14 },
-  divider: { width: 12 },
-  uploadBtnIcon: { fontSize: 22, marginBottom: 4 },
-  uploadBtnText: { fontSize: 13, color: "#A78BFA", fontWeight: "600" },
+  uploadZone: {
+    flex: 1,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 28,
+    ...shadows.card,
+  },
+  uploadIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.accentSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  uploadTitle: { fontSize: 20, fontWeight: "700", color: colors.text, marginBottom: 8 },
+  uploadSub: { fontSize: 13, color: colors.textSecondary, textAlign: "center", lineHeight: 20, marginBottom: 24 },
+  uploadButtons: { flexDirection: "row", alignItems: "center", gap: 12 },
+  uploadBtnPrimary: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    backgroundColor: colors.accent,
+    borderRadius: 12,
+  },
+  uploadBtnSecondary: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  uploadBtnTextPrimary: { fontSize: 13, color: "#FFFFFF", fontWeight: "700" },
+  uploadBtnTextSecondary: { fontSize: 13, color: colors.text, fontWeight: "700" },
   stylesPreview: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
-  stylePill: { backgroundColor: "#13131A", borderRadius: 50, paddingHorizontal: 14, paddingVertical: 7, borderWidth: 1, borderColor: "#1E1E2A" },
-  stylePillText: { fontSize: 12, color: "#9CA3AF", fontWeight: "500" },
+  stylePill: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 50,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  stylePillText: { fontSize: 12, color: colors.textSecondary, fontWeight: "600" },
   hint: { alignItems: "center" },
-  hintText: { fontSize: 13, color: "#4B5563" },
+  hintText: { fontSize: 13, color: colors.textMuted },
 });

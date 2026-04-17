@@ -15,12 +15,14 @@ import { useState, useEffect, useCallback } from "react";
 import * as Haptics from "expo-haptics";
 import * as MediaLibrary from "expo-media-library";
 import * as FileSystem from "expo-file-system";
+import { Feather } from "@expo/vector-icons";
 
 import { useGenerate } from "../hooks/useGenerate";
 import { SkeletonGrid } from "../components/SkeletonLoader";
 import { ResultCard } from "../components/ResultCard";
 import { StyleId } from "../constants/config";
 import { useDownload } from "../hooks/useDownload";
+import { colors, shadows } from "../constants/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -112,14 +114,15 @@ export default function ResultScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backText}>← Back</Text>
+          <Feather name="chevron-left" size={22} color={colors.text} />
+          <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {isGenerating ? "Creating Magic..." : isDone ? "Your Results" : "Results"}
         </Text>
         {isDone && (
           <TouchableOpacity onPress={handleRegenerate} style={styles.regenBtn}>
-            <Text style={styles.regenText}>↺</Text>
+            <Feather name="refresh-cw" size={18} color={colors.accent} />
           </TouchableOpacity>
         )}
       </View>
@@ -156,12 +159,13 @@ export default function ResultScreen() {
         )}
 
         {error && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>⚠️  {error}</Text>
-            <TouchableOpacity onPress={handleRegenerate}>
-              <Text style={styles.errorRetry}>Try again</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.errorBanner}>
+              <Feather name="alert-triangle" size={16} color={colors.danger} />
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity onPress={handleRegenerate}>
+                <Text style={styles.errorRetry}>Try again</Text>
+              </TouchableOpacity>
+            </View>
         )}
 
         <View style={styles.section}>
@@ -171,7 +175,8 @@ export default function ResultScreen() {
             </Text>
             {isDone && successCount > 0 && (
               <TouchableOpacity onPress={handleDownloadAll} style={styles.downloadAllBtn}>
-                <Text style={styles.downloadAll}>⬇ Save All</Text>
+                <Feather name="download" size={14} color={colors.accent} />
+                <Text style={styles.downloadAll}>Save all</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -196,7 +201,7 @@ export default function ResultScreen() {
       <Modal visible={!!expandedImage} transparent animationType="fade" onRequestClose={() => setExpandedImage(null)}>
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.modalClose} onPress={() => setExpandedImage(null)}>
-            <Text style={styles.modalCloseText}>✕</Text>
+            <Feather name="x" size={18} color={colors.text} />
           </TouchableOpacity>
 
           {expandedImage && (
@@ -210,13 +215,15 @@ export default function ResultScreen() {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   }}
                 >
-                  <Text style={styles.modalBtnText}>⬇  Save to Gallery</Text>
+                  <Feather name="download" size={16} color="#FFFFFF" />
+                  <Text style={styles.modalBtnText}>Save to gallery</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalBtn, styles.modalBtnSecondary]}
                   onPress={() => shareImage(expandedImage.url, expandedImage.styleId)}
                 >
-                  <Text style={styles.modalBtnText}>↗  Share</Text>
+                  <Feather name="share-2" size={16} color={colors.text} />
+                  <Text style={[styles.modalBtnText, styles.modalBtnTextSecondary]}>Share</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -228,46 +235,46 @@ export default function ResultScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0A0A0F" },
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     paddingHorizontal: 20, paddingVertical: 14,
-    borderBottomWidth: 1, borderColor: "#1E1E2A",
+    borderBottomWidth: 1, borderColor: colors.border,
   },
-  backBtn: { paddingVertical: 4, paddingRight: 16 },
-  backText: { color: "#A78BFA", fontSize: 14, fontWeight: "600" },
-  headerTitle: { flex: 1, textAlign: "center", color: "#F1F0FF", fontSize: 15, fontWeight: "700" },
+  backBtn: { paddingVertical: 4, paddingRight: 16, flexDirection: "row", alignItems: "center", gap: 6 },
+  backText: { color: colors.text, fontSize: 14, fontWeight: "600" },
+  headerTitle: { flex: 1, textAlign: "center", color: colors.text, fontSize: 15, fontWeight: "700" },
   regenBtn: { paddingLeft: 16 },
-  regenText: { fontSize: 20, color: "#7C3AED" },
   scroll: { paddingHorizontal: 20, paddingBottom: 40 },
   
   summaryCard: {
     flexDirection: "row", alignItems: "center",
-    backgroundColor: "#13131A", borderRadius: 16,
+    backgroundColor: colors.surface, borderRadius: 16,
     padding: 12, marginTop: 20, marginBottom: 24,
-    borderWidth: 1, borderColor: "#1E1E2A",
+    borderWidth: 1, borderColor: colors.border,
+    ...shadows.card,
   },
   logoContainer: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: "#1E1E2A", justifyContent: "center",
+    backgroundColor: colors.surfaceMuted, justifyContent: "center",
     alignItems: "center", marginRight: 12,
   },
   aiLogo: { width: 24, height: 24 },
   summaryContent: { flex: 1, justifyContent: "center" },
   summaryPrompt: {
-    color: "#F1F0FF", fontSize: 14, fontWeight: "500",
+    color: colors.text, fontSize: 14, fontWeight: "600",
     marginBottom: 8, fontStyle: "italic",
   },
   tagsContainer: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   tagBadge: {
-    backgroundColor: "#7C3AED30", paddingHorizontal: 8,
+    backgroundColor: colors.accentSoft, paddingHorizontal: 8,
     paddingVertical: 4, borderRadius: 8, borderWidth: 1,
-    borderColor: "#7C3AED80",
+    borderColor: colors.border,
   },
-  tagText: { color: "#A78BFA", fontSize: 10, fontWeight: "700" },
+  tagText: { color: colors.accentDark, fontSize: 10, fontWeight: "700" },
   sourceThumb: {
     width: 56, height: 56, borderRadius: 10,
-    backgroundColor: "#1E1E2A", marginLeft: 12,
+    backgroundColor: colors.surfaceMuted, marginLeft: 12,
   },
 
   section: { marginBottom: 20 },
@@ -275,40 +282,43 @@ const styles = StyleSheet.create({
     flexDirection: "row", justifyContent: "space-between",
     alignItems: "center", marginBottom: 16,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#F1F0FF" },
+  sectionTitle: { fontSize: 18, fontWeight: "700", color: colors.text },
   downloadAllBtn: {
-    backgroundColor: "#7C3AED20", paddingHorizontal: 12,
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: colors.accentSoft, paddingHorizontal: 12,
     paddingVertical: 6, borderRadius: 12,
   },
-  downloadAll: { fontSize: 13, color: "#A78BFA", fontWeight: "600" },
+  downloadAll: { fontSize: 13, color: colors.accentDark, fontWeight: "600" },
   resultsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
   errorBanner: {
-    backgroundColor: "#EF444420", borderWidth: 1, borderColor: "#EF4444",
-    borderRadius: 12, padding: 14, flexDirection: "row",
+    backgroundColor: "rgba(220, 38, 38, 0.08)", borderWidth: 1, borderColor: colors.danger,
+    borderRadius: 12, padding: 14, flexDirection: "row", gap: 10,
     justifyContent: "space-between", alignItems: "center", marginBottom: 16,
   },
-  errorText: { color: "#EF4444", fontSize: 13, flex: 1 },
-  errorRetry: { color: "#F1F0FF", fontSize: 13, fontWeight: "600", marginLeft: 12 },
+  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
+  errorRetry: { color: colors.text, fontSize: 13, fontWeight: "600", marginLeft: 12 },
   
   modalOverlay: {
-    flex: 1, backgroundColor: "rgba(0,0,0,0.92)",
+    flex: 1, backgroundColor: "rgba(15, 23, 42, 0.85)",
     justifyContent: "center", alignItems: "center",
   },
   modalClose: {
     position: "absolute", top: 60, right: 20, zIndex: 10,
-    backgroundColor: "#1E1E2A", width: 40, height: 40,
+    backgroundColor: colors.surface, width: 40, height: 40,
     borderRadius: 20, alignItems: "center", justifyContent: "center",
+    ...shadows.soft,
   },
-  modalCloseText: { color: "#F1F0FF", fontSize: 16 },
   modalImage: {
     width: width - 32, height: width - 32,
-    borderRadius: 20, backgroundColor: "#13131A",
+    borderRadius: 20, backgroundColor: colors.surface,
   },
   modalActions: { flexDirection: "row", gap: 12, marginTop: 20 },
   modalBtn: {
-    backgroundColor: "#7C3AED", paddingHorizontal: 22,
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: colors.accent, paddingHorizontal: 22,
     paddingVertical: 14, borderRadius: 14,
   },
-  modalBtnSecondary: { backgroundColor: "#1E1E2A" },
-  modalBtnText: { color: "#F1F0FF", fontSize: 14, fontWeight: "700" },
+  modalBtnSecondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  modalBtnText: { color: "#FFFFFF", fontSize: 14, fontWeight: "700" },
+  modalBtnTextSecondary: { color: colors.text },
 });

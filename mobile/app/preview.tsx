@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons"; // Swapped emojis for professional icons
+import { colors, shadows } from "../constants/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -95,7 +96,7 @@ export default function PreviewScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Feather name="chevron-left" size={24} color="#A78BFA" />
+          <Feather name="chevron-left" size={24} color={colors.accent} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Configure Styles</Text>
         <View style={{ width: 40 }} /> {/* Spacer for centering */}
@@ -148,7 +149,11 @@ export default function PreviewScreen() {
                 >
                   <View style={styles.styleCardTop}>
                     <View style={[styles.iconBox, selected && styles.iconBoxSelected]}>
-                      <Feather name={style.icon as any} size={18} color={selected ? "#F1F0FF" : "#9CA3AF"} />
+                      <Feather
+                        name={style.icon as any}
+                        size={18}
+                        color={selected ? "#FFFFFF" : colors.textMuted}
+                      />
                     </View>
                     <View style={styles.cardActions}>
                       <TouchableOpacity
@@ -156,7 +161,7 @@ export default function PreviewScreen() {
                         onPress={() => openPrompt(style.id)}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
-                        <Feather name="edit-3" size={14} color={hasPrompt ? "#A78BFA" : "#6B7280"} />
+                        <Feather name="edit-3" size={14} color={hasPrompt ? colors.accent : colors.textMuted} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -168,7 +173,7 @@ export default function PreviewScreen() {
                     <View style={styles.promptPill}>
                       <Text style={styles.promptPillText} numberOfLines={1}>"{prompt}"</Text>
                       <TouchableOpacity onPress={() => clearPrompt(style.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                        <Feather name="x" size={12} color="#A78BFA" />
+                        <Feather name="x" size={12} color={colors.accent} />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -192,18 +197,18 @@ export default function PreviewScreen() {
 
           <View style={styles.promptSheet}>
             <View style={styles.promptSheetHandle} />
-            <Text style={styles.promptSheetTitle}>
-              Tweak <Text style={{ color: "#FFFFFF" }}>{ALL_STYLES.find(s => s.id === editingPrompt)?.label}</Text> Style
-            </Text>
-            <TextInput
-              style={styles.promptSheetInput}
-              placeholder="e.g. wearing a neon jacket, cyberpunk city background..."
-              placeholderTextColor="#4B5563"
-              value={draftPrompt}
-              onChangeText={setDraftPrompt}
-              multiline
-              autoFocus
-            />
+              <Text style={styles.promptSheetTitle}>
+               Tweak <Text style={{ color: colors.text }}>{ALL_STYLES.find(s => s.id === editingPrompt)?.label}</Text> Style
+             </Text>
+              <TextInput
+               style={styles.promptSheetInput}
+               placeholder="e.g. wearing a neon jacket, cyberpunk city background..."
+              placeholderTextColor={colors.textMuted}
+               value={draftPrompt}
+               onChangeText={setDraftPrompt}
+               multiline
+               autoFocus
+             />
             <View style={styles.promptSheetActions}>
               <TouchableOpacity style={styles.promptSheetCancel} onPress={handleDismissSheet}>
                 <Text style={styles.promptSheetCancelText}>Cancel</Text>
@@ -239,113 +244,115 @@ export default function PreviewScreen() {
 const CARD_WIDTH = (width - 48 - 12) / 2;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#050508" },
+  container: { flex: 1, backgroundColor: colors.background },
   
   header: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     paddingHorizontal: 24, paddingVertical: 16,
   },
   backBtn: { width: 40, height: 40, justifyContent: "center", marginLeft: -8 },
-  headerTitle: { fontSize: 16, fontWeight: "700", color: "#FFFFFF", letterSpacing: 0.5 },
+  headerTitle: { fontSize: 16, fontWeight: "700", color: colors.text, letterSpacing: 0.4 },
   
   scroll: { paddingHorizontal: 24, paddingTop: 10, paddingBottom: 120 },
   
   imageWrapper: {
     borderRadius: 24, overflow: "hidden",
     marginBottom: 32, height: 260,
-    borderWidth: 1, borderColor: "#1E1E2A",
+    borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.surface,
+    ...shadows.card,
   },
   image: { width: "100%", height: "100%" },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 5, 8, 0.2)",
+    backgroundColor: "rgba(15, 23, 42, 0.08)",
   },
   imageBadge: {
     position: "absolute", bottom: 16, left: 16,
     flexDirection: "row", alignItems: "center",
-    backgroundColor: "rgba(139, 92, 246, 0.8)", // Semi-transparent purple
+    backgroundColor: colors.accent,
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50,
-    backdropFilter: "blur(10px)", // Works on web/newer iOS
   },
-  imageBadgeText: { color: "#F1F0FF", fontSize: 12, fontWeight: "600" },
+  imageBadgeText: { color: "#FFFFFF", fontSize: 12, fontWeight: "600" },
   
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  tagline: { fontSize: 12, letterSpacing: 2, color: "#8B5CF6", textTransform: "uppercase", fontWeight: "700" },
+  tagline: { fontSize: 12, letterSpacing: 2, color: colors.accent, textTransform: "uppercase", fontWeight: "700" },
   
   selectRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  selectLink: { fontSize: 13, color: "#9CA3AF", fontWeight: "600" },
-  selectDivider: { color: "#374151", fontSize: 12 },
+  selectLink: { fontSize: 13, color: colors.textSecondary, fontWeight: "600" },
+  selectDivider: { color: colors.textMuted, fontSize: 12 },
 
   styleGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
   styleCard: {
-    width: CARD_WIDTH, backgroundColor: "#0D0D14",
+    width: CARD_WIDTH, backgroundColor: colors.surface,
     borderRadius: 20, padding: 16,
-    borderWidth: 1.5, borderColor: "#1E1E2A",
+    borderWidth: 1, borderColor: colors.border,
+    ...shadows.soft,
   },
-  styleCardSelected: { borderColor: "#8B5CF6", backgroundColor: "rgba(139, 92, 246, 0.05)" },
+  styleCardSelected: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
   
   styleCardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 },
   iconBox: {
     width: 36, height: 36, borderRadius: 10,
-    backgroundColor: "#13131A", borderWidth: 1, borderColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: colors.border,
     alignItems: "center", justifyContent: "center"
   },
-  iconBoxSelected: { backgroundColor: "#8B5CF6", borderColor: "#8B5CF6" },
+  iconBoxSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
   
   cardActions: { flexDirection: "row", alignItems: "center" },
   actionBtn: { padding: 6 },
-  actionBtnActive: { backgroundColor: "rgba(139, 92, 246, 0.1)", borderRadius: 8 },
+  actionBtnActive: { backgroundColor: colors.accentSoft, borderRadius: 8 },
   
-  styleLabel: { fontSize: 15, fontWeight: "700", color: "#D1D5DB", marginBottom: 4 },
-  styleLabelSelected: { color: "#FFFFFF" },
-  styleDesc: { fontSize: 12, color: "#6B7280", lineHeight: 16 },
+  styleLabel: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 4 },
+  styleLabelSelected: { color: colors.text },
+  styleDesc: { fontSize: 12, color: colors.textSecondary, lineHeight: 16 },
   
   promptPill: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    marginTop: 12, backgroundColor: "#13131A",
+    marginTop: 12, backgroundColor: colors.surfaceMuted,
     borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8,
-    borderWidth: 1, borderColor: "#1E1E2A",
+    borderWidth: 1, borderColor: colors.border,
   },
-  promptPillText: { flex: 1, fontSize: 11, color: "#A78BFA", fontStyle: "italic", marginRight: 8 },
+  promptPillText: { flex: 1, fontSize: 11, color: colors.accentDark, fontStyle: "italic", marginRight: 8 },
 
   keyboardWrapper: { ...StyleSheet.absoluteFillObject, justifyContent: "flex-end", zIndex: 100, elevation: 10 },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(5, 5, 8, 0.8)' },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(15, 23, 42, 0.35)' },
   
   promptSheet: {
-    backgroundColor: "#0D0D14",
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    borderTopWidth: 1, borderColor: "#1E1E2A",
+    borderTopWidth: 1, borderColor: colors.border,
     padding: 24, paddingBottom: Platform.OS === "ios" ? 40 : 24,
   },
-  promptSheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: "#374151", alignSelf: "center", marginBottom: 20 },
-  promptSheetTitle: { fontSize: 14, color: "#9CA3AF", marginBottom: 16, fontWeight: "500" },
+  promptSheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: "center", marginBottom: 20 },
+  promptSheetTitle: { fontSize: 14, color: colors.textSecondary, marginBottom: 16, fontWeight: "500" },
   promptSheetInput: {
-    backgroundColor: "#050508",
-    borderRadius: 16, borderWidth: 1, borderColor: "#1E1E2A",
-    padding: 16, color: "#FFFFFF",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: 16, borderWidth: 1, borderColor: colors.border,
+    padding: 16, color: colors.text,
     fontSize: 15, lineHeight: 22,
     minHeight: 100, textAlignVertical: "top",
   },
   promptSheetActions: { flexDirection: "row", gap: 12, marginTop: 16 },
   promptSheetCancel: {
     flex: 1, paddingVertical: 16,
-    backgroundColor: "#13131A", borderRadius: 16,
-    alignItems: "center", borderWidth: 1, borderColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted, borderRadius: 16,
+    alignItems: "center", borderWidth: 1, borderColor: colors.border,
   },
-  promptSheetCancelText: { color: "#9CA3AF", fontSize: 15, fontWeight: "600" },
-  promptSheetSave: { flex: 1, paddingVertical: 16, backgroundColor: "#8B5CF6", borderRadius: 16, alignItems: "center" },
+  promptSheetCancelText: { color: colors.textSecondary, fontSize: 15, fontWeight: "600" },
+  promptSheetSave: { flex: 1, paddingVertical: 16, backgroundColor: colors.accent, borderRadius: 16, alignItems: "center" },
   promptSheetSaveText: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
 
   footer: {
     position: "absolute", bottom: 0, left: 0, right: 0,
     paddingHorizontal: 24, paddingVertical: 20, paddingBottom: Platform.OS === "ios" ? 36 : 24,
-    backgroundColor: "#050508",
-    borderTopWidth: 1, borderColor: "#1E1E2A",
+    backgroundColor: colors.background,
+    borderTopWidth: 1, borderColor: colors.border,
   },
   generateBtn: {
-    flexDirection: "row", backgroundColor: "#8B5CF6", borderRadius: 16,
+    flexDirection: "row", backgroundColor: colors.accent, borderRadius: 16,
     paddingVertical: 18, alignItems: "center", justifyContent: "center",
   },
-  generateBtnDisabled: { backgroundColor: "#1E1E2A" },
+  generateBtnDisabled: { backgroundColor: colors.surfaceMuted },
   generateBtnText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF", letterSpacing: 0.5 },
 });

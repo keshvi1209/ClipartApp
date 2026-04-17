@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet } from "react-native";
+import { colors, shadows } from "../constants/theme";
 
 interface SkeletonCardProps {
   delay?: number;
@@ -59,16 +60,17 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "47%",
-    backgroundColor: "#13131A",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#1E1E2A",
+    borderColor: colors.border,
+    ...shadows.soft,
   },
   image: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted,
   },
   footer: {
     padding: 10,
@@ -77,13 +79,13 @@ const styles = StyleSheet.create({
   labelShort: {
     height: 10,
     width: "40%",
-    backgroundColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 6,
   },
   labelLong: {
     height: 8,
     width: "65%",
-    backgroundColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 6,
   },
 });

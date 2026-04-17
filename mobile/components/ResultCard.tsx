@@ -10,9 +10,11 @@ import {
 import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 import * as FileSystem from "expo-file-system";
+import { Feather } from "@expo/vector-icons";
 import { StyleResult } from "../hooks/useGenerate";
 import { STYLES, StyleId } from "../constants/config";
 import { useDownload } from "../hooks/useDownload";
+import { colors, shadows } from "../constants/theme";
 
 interface ResultCardProps {
   result: StyleResult;
@@ -113,7 +115,7 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
       >
         {result.status === "loading" && (
           <View style={styles.loadingState}>
-            <ActivityIndicator color="#7C3AED" size="small" />
+            <ActivityIndicator color={colors.accent} size="small" />
             <Text style={styles.loadingText}>Generating…</Text>
           </View>
         )}
@@ -132,8 +134,8 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
 
         {result.status === "error" && (
           <View style={styles.errorState}>
-            <Text style={styles.errorIcon}>⚠️</Text>
-            <Text style={styles.errorText}>Failed</Text>
+            <Feather name="alert-triangle" size={20} color={colors.danger} />
+            <Text style={styles.errorText}>Generation failed</Text>
             <TouchableOpacity
               style={styles.retryBtn}
               onPress={() => onRetry(result.styleId as StyleId)}
@@ -154,10 +156,10 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
       {result.status === "success" && (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.actionBtn} onPress={handleDownload} activeOpacity={0.7}>
-            <Text style={styles.actionIcon}>⬇️</Text>
+            <Feather name="download" size={16} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={handleShare} activeOpacity={0.7}>
-            <Text style={styles.actionIcon}>↗️</Text>
+            <Feather name="share-2" size={16} color={colors.text} />
           </TouchableOpacity>
         </View>
       )}
@@ -168,16 +170,17 @@ export function ResultCard({ result, onRetry, onExpand }: ResultCardProps) {
 const styles = StyleSheet.create({
   card: {
     width: "47%",
-    backgroundColor: "#13131A",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "#FF00FF",
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.soft,
   },
   imageContainer: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#0D0D14",
+    backgroundColor: colors.surfaceMuted,
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
@@ -192,23 +195,24 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 11,
-    color: "#6B7280",
+    color: colors.textMuted,
     fontWeight: "500",
   },
   errorState: {
     alignItems: "center",
     gap: 6,
   },
-  errorIcon: { fontSize: 24 },
-  errorText: { fontSize: 12, color: "#EF4444" },
+  errorText: { fontSize: 12, color: colors.danger, textAlign: "center" },
   retryBtn: {
-    backgroundColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted,
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 8,
     marginTop: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  retryText: { fontSize: 12, color: "#A78BFA", fontWeight: "600" },
+  retryText: { fontSize: 12, color: colors.accentDark, fontWeight: "600" },
   badge: {
     position: "absolute",
     top: 8,
@@ -225,12 +229,11 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     borderTopWidth: 1,
-    borderColor: "#1E1E2A",
+    borderColor: colors.border,
   },
   actionBtn: {
     flex: 1,
     alignItems: "center",
     paddingVertical: 10,
   },
-  actionIcon: { fontSize: 16 },
 });

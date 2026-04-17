@@ -14,11 +14,11 @@ if (!API_BASE_URL) {
 }
 
 export const STYLES = [
-  { id: "cartoon", label: "Cartoon", emoji: "🎨", color: "#F59E0B" },
-  { id: "flat",    label: "Flat Art", emoji: "🖼️", color: "#10B981" },
-  { id: "anime",   label: "Anime",   emoji: "✨", color: "#EC4899" },
-  { id: "pixel",   label: "Pixel Art",emoji: "👾", color: "#3B82F6" },
-  { id: "sketch",  label: "Sketch",  emoji: "✏️", color: "#8B5CF6" },
+  { id: "cartoon", label: "Cartoon", emoji: "🎨", color: "#D97706" },
+  { id: "flat",    label: "Flat Art", emoji: "🖼️", color: "#059669" },
+  { id: "anime",   label: "Anime",   emoji: "✨", color: "#DB2777" },
+  { id: "pixel",   label: "Pixel Art",emoji: "👾", color: "#2563EB" },
+  { id: "sketch",  label: "Sketch",  emoji: "✏️", color: "#6D28D9" },
 ] as const;
 
 export type StyleId = typeof STYLES[number]["id"];

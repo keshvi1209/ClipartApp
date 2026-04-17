@@ -5,8 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Animated,
 } from "react-native";
+import { colors, shadows } from "../constants/theme";
 
 interface PromptEditorProps {
   value: string;
@@ -74,11 +74,12 @@ export function PromptEditor({ value, onChange }: PromptEditorProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#13131A",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#1E1E2A",
+    borderColor: colors.border,
     overflow: "hidden",
+    ...shadows.soft,
   },
   toggle: {
     flexDirection: "row",
@@ -89,37 +90,37 @@ const styles = StyleSheet.create({
   toggleLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#A78BFA",
+    color: colors.accentDark,
   },
   toggleSub: {
     fontSize: 11,
-    color: "#6B7280",
+    color: colors.textMuted,
   },
   editorBody: {
     borderTopWidth: 1,
-    borderColor: "#1E1E2A",
+    borderColor: colors.border,
     padding: 14,
     gap: 10,
   },
   input: {
-    backgroundColor: "#0A0A0F",
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 10,
     padding: 12,
-    color: "#F1F0FF",
+    color: colors.text,
     fontSize: 14,
     minHeight: 70,
     borderWidth: 1,
-    borderColor: "#1E1E2A",
+    borderColor: colors.border,
     textAlignVertical: "top",
   },
   charCount: {
     fontSize: 11,
-    color: "#4B5563",
+    color: colors.textMuted,
     textAlign: "right",
   },
   quickLabel: {
     fontSize: 11,
-    color: "#6B7280",
+    color: colors.textMuted,
     fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -130,23 +131,23 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickChip: {
-    backgroundColor: "#1E1E2A",
+    backgroundColor: colors.surfaceMuted,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: "#2A2A3A",
+    borderColor: colors.border,
   },
   quickChipActive: {
-    backgroundColor: "#7C3AED22",
-    borderColor: "#7C3AED",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
   },
   quickChipText: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: colors.textSecondary,
   },
   quickChipTextActive: {
-    color: "#A78BFA",
+    color: colors.accentDark,
     fontWeight: "600",
   },
 });

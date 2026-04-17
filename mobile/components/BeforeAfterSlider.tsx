@@ -8,6 +8,7 @@ import {
   Dimensions,
   Text,
 } from "react-native";
+import { colors, shadows } from "../constants/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -108,10 +109,13 @@ export function BeforeAfterSlider({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: "#1E1E2A",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     overflow: "hidden",
     position: "relative",
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
   },
   image: {
     width: "100%",
@@ -131,7 +135,7 @@ const styles = StyleSheet.create({
   handleLine: {
     width: 3,
     height: 60,
-    backgroundColor: "#A78BFA",
+    backgroundColor: colors.accent,
     borderRadius: 2,
   },
   handleArrowLeft: {
@@ -141,7 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     left: -8,
-    backgroundColor: "#7C3AED",
+    backgroundColor: colors.accent,
     borderRadius: 50,
   },
   handleArrowRight: {
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     right: -8,
-    backgroundColor: "#7C3AED",
+    backgroundColor: colors.accent,
     borderRadius: 50,
   },
   arrow: {
@@ -177,13 +181,13 @@ const styles = StyleSheet.create({
     right: 12,
   },
   labelBg: {
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
   },
   labelText: {
-    color: "#F1F0FF",
+    color: "#FFFFFF",
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 1,

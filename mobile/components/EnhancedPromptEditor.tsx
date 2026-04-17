@@ -6,11 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-
-const { width } = Dimensions.get("window");
+import { colors, shadows } from "../constants/theme";
 
 interface PromptEditorProps {
   value: string;
@@ -45,7 +43,7 @@ export function PromptEditor({ value, onChange }: PromptEditorProps) {
         <Text style={styles.label}>✏️ Customize</Text>
         {value && (
           <TouchableOpacity onPress={clearPrompt}>
-            <Feather name="x" size={16} color="#EF4444" />
+            <Feather name="x" size={16} color={colors.danger} />
           </TouchableOpacity>
         )}
       </View>
@@ -73,7 +71,7 @@ export function PromptEditor({ value, onChange }: PromptEditorProps) {
           <Feather
             name={showPresets ? "chevron-up" : "chevron-down"}
             size={16}
-            color="#A78BFA"
+            color={colors.accent}
           />
         </TouchableOpacity>
       </View>
@@ -106,11 +104,12 @@ export function PromptEditor({ value, onChange }: PromptEditorProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#13131A",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#1E1E2A",
+    borderColor: colors.border,
     borderRadius: 14,
     padding: 14,
+    ...shadows.soft,
   },
   labelRow: {
     flexDirection: "row",
@@ -119,27 +118,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   label: {
-    color: "#F1F0FF",
+    color: colors.text,
     fontSize: 13,
     fontWeight: "700",
   },
   inputContainer: {
-    backgroundColor: "#0A0A0F",
+    backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
-    borderColor: "#2a2a3a",
+    borderColor: colors.border,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     minHeight: 60,
   },
   input: {
-    color: "#F1F0FF",
+    color: colors.text,
     fontSize: 12,
     lineHeight: 18,
     flex: 1,
   },
   charCount: {
-    color: "#6B7280",
+    color: colors.textMuted,
     fontSize: 10,
     marginTop: 6,
   },
@@ -151,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   presetsLabel: {
-    color: "#9CA3AF",
+    color: colors.textSecondary,
     fontSize: 11,
     fontWeight: "600",
   },
@@ -167,20 +166,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   presetTag: {
-    backgroundColor: "rgba(124,58,237,0.15)",
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "rgba(124,58,237,0.35)",
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   presetText: {
-    color: "#A78BFA",
+    color: colors.accentDark,
     fontSize: 11,
     fontWeight: "600",
   },
   hint: {
-    color: "#6B7280",
+    color: colors.textMuted,
     fontSize: 10,
     marginTop: 10,
     lineHeight: 14,
