@@ -7,9 +7,15 @@ import { colors } from "../constants/theme";
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: colors.background }}
+    >
       <SafeAreaProvider>
-        <StatusBar style="dark" backgroundColor={colors.background} translucent={false} />
+        <StatusBar
+          style="light"
+          backgroundColor={colors.background}
+          translucent={false}
+        />
         <Stack
           screenOptions={{
             headerShown: false,
@@ -31,7 +37,6 @@ export default function RootLayout() {
               animation: "slide_from_bottom",
               contentStyle: { backgroundColor: colors.background },
             }}
-            
           />
         </Stack>
       </SafeAreaProvider>

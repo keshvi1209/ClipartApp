@@ -5,14 +5,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bg: "#0A0A0F",
-        surface: "#13131A",
-        border: "#1E1E2A",
+        bg: "#0F172A",
+        surface: "#1A2A47",
+        border: "#2D4178",
         accent: "#7C3AED",
         "accent-light": "#A78BFA",
         muted: "#6B7280",
-        text: "#F1F0FF",
-        "text-dim": "#9CA3AF",
+        text: "#F1F5F9",
+        "text-dim": "#CBD5E1",
       },
       fontFamily: {
         sans: ["SpaceGrotesk-Regular"],

@@ -7,12 +7,11 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
-import { Feather } from "@expo/vector-icons"; // Swapped emojis for professional icons
+import { Feather } from "@expo/vector-icons";
 import { colors, shadows } from "../constants/theme";
 
 const { width } = Dimensions.get("window");
 
-// Updated to use Feather icons instead of emojis for cross-platform consistency
 const ALL_STYLES = [
   { id: "cartoon", label: "Cartoon", icon: "smile", desc: "Stylised character art" },
   { id: "anime", label: "Anime", icon: "star", desc: "Japanese animation" },
@@ -99,7 +98,7 @@ export default function PreviewScreen() {
           <Feather name="chevron-left" size={24} color={colors.accent} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Configure Styles</Text>
-        <View style={{ width: 40 }} /> {/* Spacer for centering */}
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView 
@@ -198,17 +197,17 @@ export default function PreviewScreen() {
           <View style={styles.promptSheet}>
             <View style={styles.promptSheetHandle} />
               <Text style={styles.promptSheetTitle}>
-               Tweak <Text style={{ color: colors.text }}>{ALL_STYLES.find(s => s.id === editingPrompt)?.label}</Text> Style
-             </Text>
+                Tweak <Text style={{ color: colors.text }}>{ALL_STYLES.find(s => s.id === editingPrompt)?.label}</Text> Style
+              </Text>
               <TextInput
-               style={styles.promptSheetInput}
-               placeholder="e.g. wearing a neon jacket, cyberpunk city background..."
-              placeholderTextColor={colors.textMuted}
-               value={draftPrompt}
-               onChangeText={setDraftPrompt}
-               multiline
-               autoFocus
-             />
+                style={styles.promptSheetInput}
+                placeholder="e.g. wearing a neon jacket, cyberpunk city background..."
+                placeholderTextColor={colors.textMuted}
+                value={draftPrompt}
+                onChangeText={setDraftPrompt}
+                multiline
+                autoFocus
+              />
             <View style={styles.promptSheetActions}>
               <TouchableOpacity style={styles.promptSheetCancel} onPress={handleDismissSheet}>
                 <Text style={styles.promptSheetCancelText}>Cancel</Text>
